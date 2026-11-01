@@ -48,9 +48,6 @@ struct LundParticle {
     double px;
     double py;
     double pz;
-    double p;
-    double theta; // radians
-    double phi; // radians
     double energy = 0; // UD
     double mass = 0; // UD
     // vertex [cm]
@@ -58,49 +55,6 @@ struct LundParticle {
     double vy;
     double vz;
 };
-
-void polar2cart(double p, double theta, double phi, double & px, double & py, double & pz) {
-    pz = p*cos(theta);
-    px = p*sin(theta)*cos(phi);
-    py = p*sin(theta)*sin(phi);
-}
-
-double uniform(double a, double b, int nevents) {
-    double x = (1.0*(rand() % nevents))/nevents;
-    return (b-a)*x + a;
-}
-
-void generate_kinematics(int nevents, LundParticle & electron, LundParticle & track) {
-    // beam energy
-    double Ee = 2.23951; // GeV
-    double nu = 0.06966; // GeV, nu = E - E', this the mean of the distribution
-    // electron
-    double phi = uniform(0,360, nevents)*M_PI/180; // deg to rad
-    double theta = uniform(7,8, nevents)*M_PI/180;
-    double p = Ee - nu; // GeV
-    
-    polar2cart(p, theta, phi, electron.px, electron.py, electron.pz);
-    electron.p = p;
-    electron.theta = theta;
-    electron.phi = phi;
-    // track
-    double track_p = 2*Ee*sin(theta/2);
-    double track_pz = Ee*(1-cos(theta));
-    double track_theta = acos(track_pz/track_p);
-    double track_phi = (phi > M_PI) ? (phi - M_PI) : (phi + M_PI);
-    polar2cart(track_p, track_theta, track_phi, track.px, track.py, track.pz);
-    track.p = track_p;
-    track.theta = track_theta;
-    track.phi = track_phi;
-    // vertex
-    double vertex = uniform(-15,15, nevents); // cm
-    electron.vx = 0;
-    electron.vy = 0;
-    electron.vz = vertex;
-    track.vx = 0;
-    track.vy = 0;
-    track.vz = vertex;
-}
 
 
 #endif
