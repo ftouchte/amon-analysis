@@ -43,6 +43,25 @@ void fill_histograms(const LundParticle & particle, TH1D* h_p, TH1D* h_theta, TH
     h_phi->Fill(phi/Units::deg);
 }
 
+void progressBar(int state, int bar_length = 100) { // state is a number between 0 and 100
+    // for the moment the bar length is not variable
+    if (state > bar_length) {return ;}
+    printf("\rProgress \033[32m\[");
+    for (int i = 0; i <= state; i++) {
+        printf("#");
+    }
+    printf("\033[0m");
+    for (int i = state+1; i < bar_length; i++) {
+        printf(".");
+    }
+    if (state == 100) {
+        printf("\033[32m] \033[1m %d %%\033[0m\n", state);
+    } else {
+        printf("] %d %%", state);
+    }
+    fflush(stdout);
+}
+
 int main(int argc, const char * argv[]) {
 
     /// --- Load files from options
@@ -78,41 +97,41 @@ int main(int argc, const char * argv[]) {
     std::ofstream ofs(lund_file.c_str());
 
     // Histograms
-    TH1D* H1_electron_p = new TH1D("electron_p", "p; p (GeV); count", 100, 2.17, 2.20);
-    TH1D* H1_electron_theta = new TH1D("electron_theta", "theta; theta (deg); count", 100, 0, 90);
-    TH1D* H1_electron_phi = new TH1D("electron_phi", "phi; phi (deg); count", 100, 0, 361);
-    TH1D* H1_electron_vz = new TH1D("electron_vz", "vz; vz (cm); count", 100, -15, 15);
-    TH1D* H1_track_p = new TH1D("track_p", "p; p (GeV); count", 100, 0.15, 0.5);
-    TH1D* H1_track_theta = new TH1D("track_theta", "theta; theta (deg); count", 100, 0, 90);
-    TH1D* H1_track_phi = new TH1D("track_phi", "phi; phi (deg); count", 100, 0, 361);
-    TH1D* H1_track_vz = new TH1D("track_vz", "vz; vz (cm); count", 100, -15, 15);
+    TH1D* H1_electron_p = new TH1D("electron_p", "p; p (GeV); count", 100, 2.1, 2.3);
+    TH1D* H1_electron_theta = new TH1D("electron_theta", "theta; theta (deg); count", 100, 3, 10);
+    TH1D* H1_electron_phi = new TH1D("electron_phi", "phi; phi (deg); count", 100, -5, 365);
+    TH1D* H1_electron_vz = new TH1D("electron_vz", "vz; vz (cm); count", 100, -16, -16);
+    TH1D* H1_track_p = new TH1D("track_p", "p; p (GeV); count", 100, 0.15, 0.35);
+    TH1D* H1_track_theta = new TH1D("track_theta", "theta; theta (deg); count", 100, 50, 100);
+    TH1D* H1_track_phi = new TH1D("track_phi", "phi; phi (deg); count", 100, -5, 365);
+    TH1D* H1_track_vz = new TH1D("track_vz", "vz; vz (cm); count", 100, -16, 16);
 
     try {
         // Header
         LundHeader header;
-        header.nbOfParticles = config["N"].get<int>();
-        header.A = config["A"].get<int>();
-        header.Z = config["Z"].get<int>();
-        header.polarization = config["polarization"].get<double>(); 
-        header.spin = config["spin"].get<double>(); 
-        header.beam_type = config["beam_type"].get<int>();
-        header.beam_energy = config["beam_energy"].get<double>(); 
-        header.nucleon_id = config["interacted_nucleon"].get<int>();
-        header.process_id = config["process_id"].get<int>();
-        header.event_weight = config["event_weight"].get<double>();
+        header.nbOfParticles = config.at("header").at("N").get<int>();
+        header.A = config.at("header").at("A").get<int>();
+        header.Z = config.at("header").at("Z").get<int>();
+        header.polarization = config.at("header").at("polarization").get<double>(); 
+        header.spin = config.at("header").at("spin").get<double>(); 
+        header.beam_type = config.at("header").at("beam_type").get<int>();
+        header.beam_energy = config.at("header").at("beam_energy").get<double>(); 
+        header.nucleon_id = config.at("header").at("interacted_nucleon").get<int>();
+        header.process_id = config.at("header").at("process_id").get<int>();
+        header.event_weight = config.at("header").at("event_weight").get<double>();
 
         // electron
         LundParticle electron;
-        electron.index = config["electron"]["index"].get<int>();
-        electron.lifetime = config["electron"]["lifetime"].get<double>();
-        electron.type = config["electron"]["type"].get<int>();
-        electron.ID = config["electron"]["PID"].get<int>();
-        electron.parent_index = config["electron"]["parent_index"].get<int>();
-        electron.daughter_index = config["electron"]["daughter_index"].get<int>();
+        electron.index = config.at("electron").at("index").get<int>();
+        electron.lifetime = config.at("electron").at("lifetime").get<double>();
+        electron.type = config.at("electron").at("type").get<int>();
+        electron.ID = config.at("electron").at("PID").get<int>();
+        electron.parent_index = config.at("electron").at("parent_index").get<int>();
+        electron.daughter_index = config.at("electron").at("daughter_index").get<int>();
         electron.px = 0;
         electron.py = 0;
         electron.pz = 0;
-        electron.mass = config["electron"]["mass"].get<double>();
+        electron.mass = config.at("electron").at("mass").get<double>();
         electron.energy = 0;
         electron.vx = 0;
         electron.vy = 0;
@@ -120,16 +139,16 @@ int main(int argc, const char * argv[]) {
 
         // track
         LundParticle track;
-        track.index = config["target"]["index"].get<int>();
-        track.lifetime = config["target"]["lifetime"].get<double>();
-        track.type = config["target"]["type"].get<int>();
-        track.ID = config["target"]["PID"].get<int>();
-        track.parent_index = config["target"]["parent_index"].get<int>();
-        track.daughter_index = config["target"]["daughter_index"].get<int>();
+        track.index = config.at("target").at("index").get<int>();
+        track.lifetime = config.at("target").at("lifetime").get<double>();
+        track.type = config.at("target").at("type").get<int>();
+        track.ID = config.at("target").at("PID").get<int>();
+        track.parent_index = config.at("target").at("parent_index").get<int>();
+        track.daughter_index = config.at("target").at("daughter_index").get<int>();
         track.px = 0;
         track.py = 0;
         track.pz = 0;
-        track.mass = config["target"]["mass"].get<double>();
+        track.mass = config.at("target").at("mass").get<double>();
         track.energy = 0;
         track.vx = 0;
         track.vy = 0;
@@ -139,22 +158,24 @@ int main(int argc, const char * argv[]) {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::normal_distribution<double> gen_delta_phi(
-            config["generator"]["delta_phi"]["mean"].get<double>(), 
-            config["generator"]["delta_phi"]["sigma"].get<double>());
+            config.at("generator").at("delta_phi").at("mean").get<double>(), 
+            config.at("generator").at("delta_phi").at("sigma").get<double>());
         std::normal_distribution<double> gen_W2(
-            config["generator"]["W2"]["mean"].get<double>(), 
-            config["generator"]["W2"]["sigma"].get<double>());
+            config.at("generator").at("W2").at("mean").get<double>(), 
+            config.at("generator").at("W2").at("sigma").get<double>());
         std::normal_distribution<double> gen_electron_theta(
-            config["generator"]["electron_theta"]["mean"].get<double>(), 
-            config["generator"]["electron_theta"]["sigma"].get<double>());
+            config.at("generator").at("electron_theta").at("mean").get<double>(), 
+            config.at("generator").at("electron_theta").at("sigma").get<double>());
         std::uniform_real_distribution<double> gen_electron_phi(0, 360);
         std::uniform_real_distribution<double> gen_vertex(
-            config["generator"]["vertex"]["min"].get<double>(), 
-            config["generator"]["vertex"]["max"].get<double>());
+            config.at("generator").at("vertex").at("min").get<double>(), 
+            config.at("generator").at("vertex").at("max").get<double>());
 
         int nevents = 10000;
 
-        for (int i = 0; i <= nevents; i++) {
+        for (int i = 1; i <= nevents; i++) {
+
+            progressBar(100.0*i/nevents);
 
             // pT is the same for the electron and for the AHDC track
             // theta and phi for the electron are free
@@ -175,7 +196,7 @@ int main(int argc, const char * argv[]) {
             track.vz = vz;
 
             // Update kinematics
-            fill_histograms(electron, H1_electron_p, H1_track_theta, H1_electron_phi);
+            fill_histograms(electron, H1_electron_p, H1_electron_theta, H1_electron_phi);
             H1_electron_vz->Fill(vz);
             fill_histograms(track, H1_track_p, H1_track_theta, H1_track_phi);
             H1_track_vz->Fill(track.vz);
