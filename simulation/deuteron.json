@@ -1,0 +1,54 @@
+// Description of the lund format
+//     https://gemc.jlab.org/gemc/html/documentation/generator/lund.html
+
+
+{
+    // LUND Header
+    // Starred (*) entry needs particular interest as they are used by GEMC
+    // The others variables can have any meaning
+    "header": {
+        "N": 2, // * Number of particles
+        "A": 2, // Mass number of the target
+        "Z": 1, // Atomic number of the target
+        "polarization": 0, // Target polarization
+        "spin": 0, // * Z spin component of the first particle
+        "beam_type": 11, // Beam type: 11 for electron and 22 for photon
+        "beam_energy":  2.23949, // Beam energy en GeV
+        "interacted_nucleon": 2212, // Interacted nucleon, use 2212 or 2112
+        "process_id": 1, // process ID
+        "event_weight": 1 // Event weight
+    },
+    "target": {
+        "name": "deuteron",
+        "index": 2,
+        "lifetime": -1,
+        "type": 1, // only type 1 can be propagated in Geant4
+        "PID": 1000010020,
+        "parent_index": 0,
+        "daughter_index": 1,
+        // "px": 0,
+        // "py": 0,
+        // "pz": 0,
+        "p": {
+            "min": 200, // MeV
+            "max": 250
+        },
+        "theta": {
+            "min": 0, // deg
+            "max": 360
+        },
+        "phi": {
+            "min": 0, // deg
+            "max": 360
+        },
+        "energy": 0,
+        "mass": 0,
+        "vx": 0,
+        "vy": 0,
+        // "vz": 0
+        "vertex" : {
+            "min": -15,
+            "max": 15
+        }
+    }
+}
