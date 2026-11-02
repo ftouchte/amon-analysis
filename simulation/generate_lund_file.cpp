@@ -106,6 +106,8 @@ int main(int argc, const char * argv[]) {
     TH1D* H1_track_phi = new TH1D("track_phi", "phi; phi (deg); count", 100, -5, 365);
     TH1D* H1_track_vz = new TH1D("track_vz", "vz; vz (cm); count", 100, -16, 16);
 
+    int nevents = 1000;
+
     try {
         // Header
         LundHeader header;
@@ -157,21 +159,15 @@ int main(int argc, const char * argv[]) {
         // Generator
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::normal_distribution<double> gen_delta_phi(
-            config.at("generator").at("delta_phi").at("mean").get<double>(), 
-            config.at("generator").at("delta_phi").at("sigma").get<double>());
-        std::normal_distribution<double> gen_W2(
-            config.at("generator").at("W2").at("mean").get<double>(), 
-            config.at("generator").at("W2").at("sigma").get<double>());
-        std::normal_distribution<double> gen_electron_theta(
-            config.at("generator").at("electron_theta").at("mean").get<double>(), 
-            config.at("generator").at("electron_theta").at("sigma").get<double>());
-        std::uniform_real_distribution<double> gen_electron_phi(0, 360);
+        std::uniform_real_distribution<double> gen_electron_theta(
+            config.at("generator").at("electron_theta").at("min").get<double>(), 
+            config.at("generator").at("electron_theta").at("max").get<double>());
+        std::uniform_real_distribution<double> gen_electron_phi(
+            config.at("generator").at("electron_phi").at("min").get<double>(), 
+            config.at("generator").at("electron_phi").at("max").get<double>());
         std::uniform_real_distribution<double> gen_vertex(
             config.at("generator").at("vertex").at("min").get<double>(), 
             config.at("generator").at("vertex").at("max").get<double>());
-
-        int nevents = 10000;
 
         for (int i = 1; i <= nevents; i++) {
 
@@ -179,13 +175,14 @@ int main(int argc, const char * argv[]) {
 
             // pT is the same for the electron and for the AHDC track
             // theta and phi for the electron are free
-            double W2 = gen_W2(gen);
+            //double W2 = gen_W2(gen);
             double phi = gen_electron_phi(gen)*Units::deg;
             double theta = gen_electron_theta(gen)*Units::deg;
+            double vz = gen_vertex(gen);
             double M = track.mass;
             double E = header.beam_energy;
-            double p = (M*M + 2*M*E - W2)/(4*E*pow(sin(theta/2),2.0)+2*M);
-            double vz = gen_vertex(gen);
+            //double p = (M*M + 2*M*E - W2)/(4*E*pow(sin(theta/2),2.0)+2*M);
+            double p = (2*M*E)/(4*E*pow(sin(theta/2),2.0)+2*M);
             electron.px = p*sin(theta)*cos(phi);
             electron.py = p*sin(theta)*sin(phi);
             electron.pz = p*cos(theta);
@@ -197,7 +194,7 @@ int main(int argc, const char * argv[]) {
 
             // Update kinematics
             fill_histograms(electron, H1_electron_p, H1_electron_theta, H1_electron_phi);
-            H1_electron_vz->Fill(vz);
+            H1_electron_vz->Fill(electron.vz);
             fill_histograms(track, H1_track_p, H1_track_theta, H1_track_phi);
             H1_track_vz->Fill(track.vz);
             // Ici l'ordre est très important !!!
