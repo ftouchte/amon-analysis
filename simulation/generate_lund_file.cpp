@@ -160,9 +160,6 @@ int main(int argc, const char * argv[]) {
         // Generator
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<double> gen_electron_pT(
-            config.at("generator").at("electron_pT").at("min").get<double>(), 
-            config.at("generator").at("electron_pT").at("max").get<double>());
         std::uniform_real_distribution<double> gen_electron_theta(
             config.at("generator").at("electron_theta").at("min").get<double>(), 
             config.at("generator").at("electron_theta").at("max").get<double>());
