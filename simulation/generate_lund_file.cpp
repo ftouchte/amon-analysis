@@ -180,7 +180,7 @@ int main(int argc, const char * argv[]) {
             double vz = gen_vertex(gen);
             double M = track.mass;
             double E = header.beam_energy;
-            //double p = pT/sin(theta);
+            // W^2 should match M^2, p and theta are correlated
             double p = (2*M*E)/(4*E*pow(sin(theta/2),2.0)+2*M);
             electron.px = p*sin(theta)*cos(phi);
             electron.py = p*sin(theta)*sin(phi);

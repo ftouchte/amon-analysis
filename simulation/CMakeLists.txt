@@ -27,24 +27,9 @@ FetchContent_MakeAvailable(json)
 # ============================================================
 
 ######################################
-# --- run only hit from track
 
-add_executable(run 
-    run.cpp
-    fOptions.cpp
-) # cpp code
 
-target_include_directories(run PRIVATE
-    ${CMAKE_SOURCE_DIR}/
-    ${HIPO_DIR}
-    ${ROOT_INCLUDE_DIRS}
-) # header
 
-target_link_libraries(run PRIVATE 
-    ${HIPO_DIR}/lib/libhipo4.so
-    ${HIPO_DIR}/lib/liblz4.so
-    ${ROOT_LIBRARIES}
-) # libray
 ###########################################
 # --- Test JSON
 add_executable(test test.cpp)
