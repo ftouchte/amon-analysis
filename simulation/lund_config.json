@@ -52,13 +52,17 @@
         "vz": 0
     },
     "generator": {
-        "electron_phi": {
-            "min": -3,
-            "max": 3
+        "electron_pT": {
+            "min": 0.2, // GeV
+            "max": 0.3
         },
         "electron_theta": {
-            "min": 7,
+            "min": 7, // deg
             "max": 8
+        },
+        "electron_phi": {
+            "min": -3, // deg
+            "max": 3
         },
         "vertex": {
             "min": -15, // cm

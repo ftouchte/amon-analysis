@@ -100,11 +100,12 @@ int main(int argc, const char * argv[]) {
     TH1D* H1_electron_p = new TH1D("electron_p", "p; p (GeV); count", 100, 2.1, 2.3);
     TH1D* H1_electron_theta = new TH1D("electron_theta", "theta; theta (deg); count", 100, 3, 10);
     TH1D* H1_electron_phi = new TH1D("electron_phi", "phi; phi (deg); count", 100, -5, 365);
-    TH1D* H1_electron_vz = new TH1D("electron_vz", "vz; vz (cm); count", 100, -16, -16);
+    TH1D* H1_electron_vz = new TH1D("electron_vz", "vz; vz (cm); count", 100, -16, 16);
     TH1D* H1_track_p = new TH1D("track_p", "p; p (GeV); count", 100, 0.15, 0.35);
     TH1D* H1_track_theta = new TH1D("track_theta", "theta; theta (deg); count", 100, 50, 100);
     TH1D* H1_track_phi = new TH1D("track_phi", "phi; phi (deg); count", 100, -5, 365);
     TH1D* H1_track_vz = new TH1D("track_vz", "vz; vz (cm); count", 100, -16, 16);
+    TH1D* H1_W2 = new TH1D("W2", "W2; W2 (Gev^{2}); count", 50, 3.2, 4);
 
     int nevents = 1000;
 
@@ -159,6 +160,9 @@ int main(int argc, const char * argv[]) {
         // Generator
         std::random_device rd;
         std::mt19937 gen(rd());
+        std::uniform_real_distribution<double> gen_electron_pT(
+            config.at("generator").at("electron_pT").at("min").get<double>(), 
+            config.at("generator").at("electron_pT").at("max").get<double>());
         std::uniform_real_distribution<double> gen_electron_theta(
             config.at("generator").at("electron_theta").at("min").get<double>(), 
             config.at("generator").at("electron_theta").at("max").get<double>());
@@ -173,15 +177,13 @@ int main(int argc, const char * argv[]) {
 
             progressBar(100.0*i/nevents);
 
-            // pT is the same for the electron and for the AHDC track
-            // theta and phi for the electron are free
-            //double W2 = gen_W2(gen);
+            //double pT = gen_electron_pT(gen)*Units::deg;
             double phi = gen_electron_phi(gen)*Units::deg;
             double theta = gen_electron_theta(gen)*Units::deg;
             double vz = gen_vertex(gen);
             double M = track.mass;
             double E = header.beam_energy;
-            //double p = (M*M + 2*M*E - W2)/(4*E*pow(sin(theta/2),2.0)+2*M);
+            //double p = pT/sin(theta);
             double p = (2*M*E)/(4*E*pow(sin(theta/2),2.0)+2*M);
             electron.px = p*sin(theta)*cos(phi);
             electron.py = p*sin(theta)*sin(phi);
@@ -191,6 +193,13 @@ int main(int argc, const char * argv[]) {
             track.py = -p*sin(theta)*sin(phi);
             track.pz = E-p*cos(theta);
             track.vz = vz;
+
+            // W2
+            double nu = E - p;
+            double Q2 = 4*E*p*pow(sin((theta/2)*M_PI/180),2);
+            double W2 = pow(track.mass,2) + 2*track.mass*nu - Q2;
+            H1_W2->Fill(W2);
+
 
             // Update kinematics
             fill_histograms(electron, H1_electron_p, H1_electron_theta, H1_electron_phi);
@@ -256,6 +265,7 @@ int main(int argc, const char * argv[]) {
     H1_track_theta->Write("track_theta");
     H1_track_phi->Write("track_phi");
     H1_track_vz->Write("track_vz");
+    H1_W2->Write("W2");
     f->Close();    
     
     // close file
