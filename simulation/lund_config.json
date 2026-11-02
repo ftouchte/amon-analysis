@@ -52,10 +52,6 @@
         "vz": 0
     },
     "generator": {
-        "electron_pT": {
-            "min": 0.2, // GeV
-            "max": 0.3
-        },
         "electron_theta": {
             "min": 7, // deg
             "max": 8
